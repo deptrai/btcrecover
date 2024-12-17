@@ -1401,8 +1401,11 @@ class Test07WalletDecryption(unittest.TestCase):
     def test_dogechain_info_cpu(self):
         self.wallet_tester("dogechain.wallet.aes.json")
 
-    def test_dogechain_info_cpu(self):
-        self.wallet_tester("dogechain.wallet.aes.json.2024-12")
+    def test_dogechain_info_cpu_2024_CBC(self):
+        self.wallet_tester("dogechain.wallet.aes.json.2024-cbc")
+
+     def test_dogechain_info_cpu_2024_GCM(self):
+        self.wallet_tester("dogechain.wallet.aes.json.2024-gcm")
 
     @skipUnless(can_load_ecdsa, "requires ECDSA")
     @skipUnless(can_load_bitcoinutils,  "requires Bitcoin-Utils")

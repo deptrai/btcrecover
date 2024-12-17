@@ -3048,17 +3048,19 @@ class WalletDogechain(object):
 
             if self.aes_cipher == "AES-CBC":
                 decrypted_block = AES.new(key, AES.MODE_CBC, self.iv).decrypt(self._encrypted_block)
-            else:
-                try:
-                    decrypted_block = AES.new(key, AES.MODE_GCM, self.iv).decrypt_and_verify(self._encrypted_block, self.aes_auth_tag)
-                    return password.decode("utf_8", "replace"), count
-                except ValueError:
-                    continue
 
-            if self.check_decrypted_block(decrypted_block, password):
+                if self.check_decrypted_block(decrypted_block, password):
                     # Decrypt and dump the wallet if required
                     self.decrypt_wallet(password)
                     return password.decode("utf_8", "replace"), count
+            else:
+                try:
+                    # For AES-GCM we need to decrypt the whole wallet, not just a block,
+                    # also don't need to manually check the file contents as verification is part of the decryption
+                    decrypted_block = AES.new(key, AES.MODE_GCM, self.iv).decrypt_and_verify(self._encrypted_wallet, self.aes_auth_tag)
+                    return password.decode("utf_8", "replace"), count
+                except ValueError:
+                    continue
 
         return False, count
 
@@ -3077,17 +3079,17 @@ class WalletDogechain(object):
         for count, (password, key) in enumerate(results, 1):
             if self.aes_cipher == "AES-CBC":
                 decrypted_block = AES.new(key, AES.MODE_CBC, self.iv).decrypt(self._encrypted_block)
+                if self.check_decrypted_block(decrypted_block, password):
+                    # Decrypt and dump the wallet if required
+                    self.decrypt_wallet(password)
+                    return password.decode("utf_8", "replace"), count
             else:
                 try:
-                    decrypted_block = AES.new(key, AES.MODE_GCM, self.iv).decrypt_and_verify(self._encrypted_block,
+                    decrypted_block = AES.new(key, AES.MODE_GCM, self.iv).decrypt_and_verify(self._encrypted_wallet,
                                                                                              self.aes_auth_tag)
                     return password.decode("utf_8", "replace"), count
                 except ValueError:
                     continue
-            if self.check_decrypted_block(decrypted_block, password):
-                    # Decrypt and dump the wallet if required
-                    self.decrypt_wallet(password)
-                    return password.decode("utf_8", "replace"), count
 
         return False, count
 
