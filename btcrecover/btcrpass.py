@@ -2942,6 +2942,9 @@ class WalletDogechain(object):
 
         self._encrypted_block = self._encrypted_wallet[:32]
 
+        if ";" in wallet_json["payload"]:
+            exit("\n**ERROR**\nFound RSA-encrypted Dogechain wallet payload, this means it wasn't downloaded in a way that supports password recovery or decryption... You cannot decrypt this wallet and will need to download it correctly or request your encrypted wallet from dogechain)")
+
         return self
 
     @classmethod
